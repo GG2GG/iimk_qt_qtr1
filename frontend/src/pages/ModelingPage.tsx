@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { apiClient } from '../api/client';
+import { Card, Button } from '../components/ui';
+import { Calculator } from 'lucide-react';
 
 export default function ModelingPage() {
     const [target, setTarget] = useState('Addicted_Score');
@@ -34,31 +36,35 @@ export default function ModelingPage() {
     };
 
     return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">🔮 Statistical Modeling</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-8">
+            <div>
+                <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Statistical Modeling</h2>
+                <p className="text-slate-500 mt-1">Ordinary Least Squares (OLS) Regression Analysis.</p>
+            </div>
+
+            <Card className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Target Variable (Y)</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Target Variable (Dependent)</label>
                         <select
                             value={target}
                             onChange={(e) => setTarget(e.target.value)}
-                            className="w-full p-2 border rounded-lg"
+                            className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
                         >
                             <option value="Addicted_Score">Addicted_Score</option>
                             <option value="Mental_Health_Score">Mental_Health_Score</option>
                         </select>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Predictors (X)</label>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Predictors (Independent)</label>
                         <div className="flex flex-wrap gap-2">
                             {availableFeatures.map(feat => (
                                 <button
                                     key={feat}
                                     onClick={() => togglePredictor(feat)}
-                                    className={`px-3 py-1 text-sm rounded-full border transition-colors ${predictors.includes(feat)
-                                            ? 'bg-blue-100 text-blue-700 border-blue-200'
-                                            : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+                                    className={`px-4 py-2 text-sm rounded-full font-medium transition-all border ${predictors.includes(feat)
+                                            ? 'bg-blue-100 text-blue-700 border-blue-200 shadow-sm'
+                                            : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 hover:bg-slate-50'
                                         }`}
                                 >
                                     {feat}
@@ -67,25 +73,36 @@ export default function ModelingPage() {
                         </div>
                     </div>
                 </div>
-                <button
-                    onClick={runModel}
-                    disabled={loading || predictors.length === 0}
-                    className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-                >
-                    {loading ? 'Fitting Model...' : 'Run OLS Regression'}
-                </button>
-                {error && <p className="mt-2 text-red-500 text-sm">{error}</p>}
-            </div>
+
+                <div className="flex items-center gap-4">
+                    <Button
+                        onClick={runModel}
+                        disabled={loading || predictors.length === 0}
+                        className="w-full md:w-auto"
+                    >
+                        {loading ? 'Fitting Model...' : 'Run OLS Regression'}
+                    </Button>
+                    {error && <span className="text-red-500 text-sm font-medium">{error}</span>}
+                </div>
+            </Card>
 
             {modelData && (
-                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm overflow-x-auto">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Model Summary</h3>
-                    {/* Render raw HTML from statsmodels safely-ish */}
-                    <div
-                        className="prose max-w-none text-xs"
-                        dangerouslySetInnerHTML={{ __html: modelData.summary_html }}
-                    />
-                </div>
+                <Card className="p-0 overflow-hidden" delay={0.2}>
+                    <div className="bg-slate-50 p-4 border-b border-slate-200 flex items-center gap-2">
+                        <Calculator size={18} className="text-slate-500" />
+                        <h3 className="font-semibold text-slate-700">Model Summary</h3>
+                    </div>
+                    <div className="p-6 overflow-x-auto bg-white">
+                        {/* 
+                           We apply prose-sm but also some custom CSS override for the statsmodels HTML table 
+                           because standard tables are ugly.
+                        */}
+                        <div
+                            className="prose prose-sm max-w-none prose-table:border prose-table:border-slate-200 prose-td:p-2 prose-th:p-2 prose-th:bg-slate-50"
+                            dangerouslySetInnerHTML={{ __html: modelData.summary_html }}
+                        />
+                    </div>
+                </Card>
             )}
         </div>
     );

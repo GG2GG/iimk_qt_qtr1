@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { Card } from '../components/ui';
+import { PieChart, Activity } from 'lucide-react';
 
 export default function MetricsPage() {
     const [gini, setGini] = useState<any>(null);
@@ -32,62 +34,90 @@ export default function MetricsPage() {
     }, []);
 
     return (
-        <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">🧮 Experimental Research Metrics</h2>
-                <p className="text-gray-500">Advanced quantitative metrics for rigorous analysis.</p>
+        <div className="space-y-8">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-3xl font-bold text-slate-900 tracking-tight">Experimental Research Metrics</h2>
+                    <p className="text-slate-500 mt-1">Advanced quantitative measures for rigorous analysis.</p>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Gini Coefficients */}
-                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">Gini Coefficients (Inequality)</h3>
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-purple-100 text-purple-600 rounded-lg">
+                            <PieChart size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">Inequality Metrics (Gini)</h3>
+                            <p className="text-xs text-slate-400">0 = Perfect Equality, 1 = Perfect Inequality</p>
+                        </div>
+                    </div>
+
                     {gini ? (
-                        <div className="space-y-4">
+                        <div className="space-y-5">
                             {Object.entries(gini).map(([key, val]: [string, any]) => (
                                 <div key={key}>
-                                    <div className="flex justify-between mb-1">
-                                        <span className="text-sm text-gray-600">{key.replace(/_/g, ' ')}</span>
-                                        <span className="font-mono font-bold text-blue-600">{val.toFixed(3)}</span>
+                                    <div className="flex justify-between mb-2">
+                                        <span className="text-sm font-medium text-slate-600">{key.replace(/_/g, ' ')}</span>
+                                        <span className="font-mono font-bold text-purple-600 text-sm">{val.toFixed(3)}</span>
                                     </div>
-                                    <div className="w-full bg-gray-100 rounded-full h-2">
-                                        <div className="bg-blue-500 h-2 rounded-full" style={{ width: `${val * 100}%` }}></div>
+                                    <div className="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                                        <div
+                                            className="bg-purple-500 h-full rounded-full transition-all duration-1000 ease-out"
+                                            style={{ width: `${val * 100}%` }}
+                                        ></div>
                                     </div>
                                 </div>
                             ))}
-                            <p className="text-xs text-gray-400 mt-2">0 = Perfect Equality, 1 = Perfect Inequality</p>
                         </div>
                     ) : (
-                        <p>Loading...</p>
+                        <div className="animate-pulse space-y-4">
+                            <div className="h-4 bg-slate-100 rounded w-3/4"></div>
+                            <div className="h-4 bg-slate-100 rounded w-1/2"></div>
+                        </div>
                     )}
-                </div>
+                </Card>
 
                 {/* Monte Carlo */}
-                <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2">Monte Carlo Simulation</h3>
-                    <p className="text-xs text-gray-500 mb-4">Bootstrapping Mean Addiction Score (1000 iter)</p>
+                <Card className="p-6">
+                    <div className="flex items-center gap-3 mb-6">
+                        <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                            <Activity size={20} />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-bold text-slate-800">Monte Carlo Simulation</h3>
+                            <p className="text-xs text-slate-400">Bootstrapping Mean Addiction Score (1000 iter)</p>
+                        </div>
+                    </div>
 
-                    {monteCarlo && (
+                    {monteCarlo ? (
                         <>
-                            <div className="h-48">
+                            <div className="h-64 -ml-4">
                                 <ResponsiveContainer width="100%" height="100%">
                                     <BarChart data={monteCarlo.chartData}>
-                                        <CartesianGrid vertical={false} strokeDasharray="3 3" />
+                                        <CartesianGrid vertical={false} strokeDasharray="3 3" stroke="#f1f5f9" />
                                         <XAxis dataKey="val" hide />
-                                        <Tooltip />
-                                        <Bar dataKey="freq" fill="#8b5cf6" />
+                                        <Tooltip
+                                            cursor={{ fill: '#f8fafc' }}
+                                            contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
+                                        />
+                                        <Bar dataKey="freq" fill="#10b981" radius={[4, 4, 0, 0]} />
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
-                            <div className="mt-4 flex justify-between text-sm">
-                                <span className="text-gray-500">95% CI:</span>
-                                <span className="font-mono font-medium">
+                            <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex justify-between items-center">
+                                <span className="text-emerald-800 text-sm font-medium">95% Confidence Interval</span>
+                                <span className="font-mono font-bold text-emerald-700">
                                     [{monteCarlo.ci_95[0].toFixed(2)}, {monteCarlo.ci_95[1].toFixed(2)}]
                                 </span>
                             </div>
                         </>
+                    ) : (
+                        <div className="animate-pulse h-64 bg-slate-100 rounded-xl"></div>
                     )}
-                </div>
+                </Card>
             </div>
         </div>
     );
