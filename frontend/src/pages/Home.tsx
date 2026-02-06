@@ -42,7 +42,7 @@ interface SummaryData {
 export default function Home() {
     const [data, setData] = useState<SummaryData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         fetchSummary()
