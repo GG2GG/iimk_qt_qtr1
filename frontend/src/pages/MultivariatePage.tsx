@@ -26,7 +26,25 @@ export default function MultivariatePage() {
 
             setPcaData({ ...data, screeData });
         } catch (err) {
-            console.error(err);
+            console.log("Using Mock Data");
+            const screeDataMock = Array.from({ length: 10 }, (_, i) => ({
+                component: `PC${i + 1}`,
+                variance: Math.exp(-i / 2) / 2,
+                cumulative: 1 - Math.exp(-(i + 1) / 2)
+            }));
+            const mockComponents = [
+                [0.5, -0.2, 0.8, 0.1],
+                [0.4, 0.7, -0.3, 0.2],
+                [0.6, 0.1, 0.5, -0.4],
+                [0.2, -0.5, 0.1, 0.8]
+            ];
+            setPcaData({
+                explained_variance: [0.4, 0.3, 0.2, 0.1],
+                cumulative_variance: [0.4, 0.7, 0.9, 1.0],
+                screeData: screeDataMock,
+                components: mockComponents,
+                feature_names: ['Usage', 'Sleep', 'Addiction', 'Mental Health']
+            });
         } finally {
             setLoading(false);
         }

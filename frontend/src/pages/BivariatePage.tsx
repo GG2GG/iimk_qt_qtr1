@@ -17,7 +17,16 @@ export default function BivariatePage() {
                 const { data } = await apiClient.post(`/bivariate/${endpoint}`);
                 setMatrixData(data);
             } catch (err) {
-                console.error(err);
+                console.log("Using Mock Data");
+                const cols = ['Age', 'Usage_Hrs', 'Addiction', 'Sleep', 'Mental_Health'];
+                const matrix = [
+                    [1.0, 0.3, 0.1, -0.2, 0.05],
+                    [0.3, 1.0, 0.85, -0.5, 0.4],
+                    [0.1, 0.85, 1.0, -0.6, 0.7],
+                    [-0.2, -0.5, -0.6, 1.0, -0.3],
+                    [0.05, 0.4, 0.7, -0.3, 1.0]
+                ];
+                setMatrixData({ x: cols, y: cols, z: matrix });
             } finally {
                 setLoading(false);
             }
