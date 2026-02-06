@@ -8,7 +8,7 @@ export default function MultivariatePage() {
     const [loading, setLoading] = useState(false);
 
     // Hardcoded numeric columns for now
-    const [selectedCols, setSelectedCols] = useState<string[]>([
+    const [selectedCols] = useState<string[]>([
         'Avg_Daily_Usage_Hours', 'Addicted_Score', 'Mental_Health_Score', 'Sleep_Hours_Per_Night'
     ]);
 

@@ -2,7 +2,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, BarChart2, GitMerge, Network,
     Calculator, FileText, FlaskConical, PieChart,
-    Settings, Zap, X, Menu
+    Zap, X, Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useState } from 'react';

@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, CartesianGrid } from 'recharts';
 import { Card } from '../components/ui';
 import { PieChart, Activity } from 'lucide-react';
 
 export default function MetricsPage() {
     const [gini, setGini] = useState<any>(null);
     const [monteCarlo, setMonteCarlo] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -26,8 +25,6 @@ export default function MetricsPage() {
                 setMonteCarlo({ ...mcRes.data, chartData: mcData });
             } catch (err) {
                 console.error(err);
-            } finally {
-                setLoading(false);
             }
         };
         fetchData();

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { fetchSummary } from '../api/client';
 import { Users, Clock, Brain, Activity } from 'lucide-react';
-import { PageContainer, PageHeader, Section } from '../components/Layout';
+import { PageContainer, Section } from '../components/Layout';
 import { StatCard, GlassCard, ChartContainer } from '../components/PremiumUI';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
