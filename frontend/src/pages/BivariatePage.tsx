@@ -1,38 +1,58 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../api/client';
 import { GlassCard } from '../components/PremiumUI';
-import { GitMerge, FileText, Info } from 'lucide-react';
+import BoxPlotChart from '../components/BoxPlotChart';
+import { GitMerge, FileText, Info, BarChart2 } from 'lucide-react';
 import { PageContainer } from '../components/Layout';
 
 export default function BivariatePage() {
-    const [activeTab, setActiveTab] = useState<'correlation' | 'cramers'>('correlation');
+    const [activeTab, setActiveTab] = useState<'correlation' | 'cramers' | 'boxplot'>('correlation');
     const [matrixData, setMatrixData] = useState<any>(null);
+    const [boxData, setBoxData] = useState<any[]>([]);
+
+    // Box Plot Selections
+    const [xVar, setXVar] = useState('Gender');
+    const [yVar, setYVar] = useState('Addicted_Score');
+
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         async function getData() {
             setLoading(true);
             try {
-                const endpoint = activeTab === 'correlation' ? 'correlation' : 'cramers';
-                const { data } = await apiClient.post(`/bivariate/${endpoint}`);
-                setMatrixData(data);
+                if (activeTab === 'boxplot') {
+                    const { data } = await apiClient.post('/bivariate/boxplot', { x_col: xVar, y_col: yVar });
+                    setBoxData(data);
+                } else {
+                    const endpoint = activeTab === 'correlation' ? 'correlation' : 'cramers';
+                    const { data } = await apiClient.post(`/bivariate/${endpoint}`);
+                    setMatrixData(data);
+                }
             } catch (err) {
-                console.log("Using Mock Data");
-                const cols = ['Age', 'Usage_Hrs', 'Addiction', 'Sleep', 'Mental_Health'];
-                const matrix = [
-                    [1.0, 0.3, 0.1, -0.2, 0.05],
-                    [0.3, 1.0, 0.85, -0.5, 0.4],
-                    [0.1, 0.85, 1.0, -0.6, 0.7],
-                    [-0.2, -0.5, -0.6, 1.0, -0.3],
-                    [0.05, 0.4, 0.7, -0.3, 1.0]
-                ];
-                setMatrixData({ x: cols, y: cols, z: matrix });
+                console.log("Using Mock Data / API Error");
+                if (activeTab === 'boxplot') {
+                    // Mock Box Data
+                    setBoxData([
+                        { category: 'Male', min: 20, q1: 35, median: 45, q3: 55, max: 70, outliers: [15, 75, 80], count: 120 },
+                        { category: 'Female', min: 22, q1: 38, median: 48, q3: 60, max: 75, outliers: [18], count: 140 },
+                    ]);
+                } else {
+                    const cols = ['Age', 'Usage_Hrs', 'Addiction', 'Sleep', 'Mental_Health'];
+                    const matrix = [
+                        [1.0, 0.3, 0.1, -0.2, 0.05],
+                        [0.3, 1.0, 0.85, -0.5, 0.4],
+                        [0.1, 0.85, 1.0, -0.6, 0.7],
+                        [-0.2, -0.5, -0.6, 1.0, -0.3],
+                        [0.05, 0.4, 0.7, -0.3, 1.0]
+                    ];
+                    setMatrixData({ x: cols, y: cols, z: matrix });
+                }
             } finally {
                 setLoading(false);
             }
         }
         getData();
-    }, [activeTab]);
+    }, [activeTab, xVar, yVar]);
 
     // Helper to colorize correlation cells
     const getCellColor = (val: number) => {
@@ -76,6 +96,14 @@ export default function BivariatePage() {
                             <GitMerge size={16} />
                             Categorical (Cramér's V)
                         </button>
+                        <button
+                            onClick={() => setActiveTab('boxplot')}
+                            className={`px-4 py-2 text-sm font-medium rounded-lg transition-all flex items-center gap-2 ${activeTab === 'boxplot' ? 'bg-rose-50 text-rose-700 shadow-sm' : 'text-slate-500 hover:text-slate-900'
+                                }`}
+                        >
+                            <BarChart2 size={16} />
+                            Box Plots
+                        </button>
                     </div>
                 </div>
 
@@ -90,7 +118,7 @@ export default function BivariatePage() {
                         <div className="p-4 overflow-auto rounded-2xl">
                             <h3 className="text-lg font-semibold text-slate-800 mb-6 flex items-center gap-2">
                                 <span className="w-2 h-2 rounded-full bg-cyan-500 shadow-sm"></span>
-                                {activeTab === 'correlation' ? 'Pearson Correlation Matrix' : 'Cramér\'s V Association Matrix'}
+                                {activeTab === 'correlation' ? 'Pearson Correlation Matrix' : activeTab === 'cramers' ? 'Cramér\'s V Association Matrix' : 'Distribution Comparison (Box Plot)'}
                             </h3>
 
                             <div className="overflow-x-auto pb-4 custom-scrollbar">
@@ -127,6 +155,40 @@ export default function BivariatePage() {
                                         ))}
                                     </tbody>
                                 </table>
+                            </div>
+                        </div>
+                    ) : activeTab === 'boxplot' && boxData ? (
+                        <div className="p-4 rounded-2xl h-[500px] flex flex-col">
+                            <div className="flex flex-wrap gap-4 mb-6">
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                    Group By (X):
+                                    <select
+                                        value={xVar}
+                                        onChange={(e) => setXVar(e.target.value)}
+                                        className="bg-white border border-slate-300 text-slate-700 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="Gender">Gender</option>
+                                        <option value="Region">Region</option>
+                                        <option value="Influence_Level">Influence Level</option>
+                                    </select>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                                    Metric (Y):
+                                    <select
+                                        value={yVar}
+                                        onChange={(e) => setYVar(e.target.value)}
+                                        className="bg-white border border-slate-300 text-slate-700 rounded-lg px-3 py-1.5 focus:ring-2 focus:ring-blue-500 outline-none"
+                                    >
+                                        <option value="Addicted_Score">Addiction Score</option>
+                                        <option value="Mental_Health_Score">Mental Health Score</option>
+                                        <option value="Avg_Daily_Usage_Hours">Daily Usage (Hours)</option>
+                                        <option value="Age">Age</option>
+                                    </select>
+                                </label>
+                            </div>
+
+                            <div className="flex-1 w-full min-h-0">
+                                <BoxPlotChart data={boxData} />
                             </div>
                         </div>
                     ) : (

@@ -142,6 +142,94 @@ def get_pca(req: PcaRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+class BoxPlotRequest(BaseModel):
+    x_col: str
+    y_col: str
+
+@app.post("/api/bivariate/boxplot")
+def get_boxplot_stats(req: BoxPlotRequest):
+    if req.x_col not in df.columns or req.y_col not in df.columns:
+        raise HTTPException(status_code=404, detail="Column not found")
+        
+    data = df[[req.x_col, req.y_col]].dropna()
+    
+    results = []
+    groups = data.groupby(req.x_col)[req.y_col]
+    
+    for name, group in groups:
+        # Calculate quartiles using numpy
+        q1 = np.percentile(group, 25)
+        median = np.percentile(group, 50)
+        q3 = np.percentile(group, 75)
+        iqr = q3 - q1
+        
+        # Calculate whiskers (1.5 * IQR rule)
+        lower_whisker = max(group.min(), q1 - 1.5 * iqr)
+        upper_whisker = min(group.max(), q3 + 1.5 * iqr)
+        
+        # Identify outliers
+        outliers = group[(group < lower_whisker) | (group > upper_whisker)].tolist()
+        
+        # Count for sizing/info
+        count = len(group)
+        
+        results.append({
+            "category": str(name),
+            "min": float(lower_whisker),
+            "q1": float(q1),
+            "median": float(median),
+            "q3": float(q3),
+            "max": float(upper_whisker),
+            "outliers": [float(x) for x in outliers],
+            "count": int(count)
+        })
+        
+    return results
+
+class BoxPlotRequest(BaseModel):
+    x_col: str
+    y_col: str
+
+@app.post("/api/bivariate/boxplot")
+def get_boxplot_stats(req: BoxPlotRequest):
+    if req.x_col not in df.columns or req.y_col not in df.columns:
+        raise HTTPException(status_code=404, detail="Column not found")
+        
+    data = df[[req.x_col, req.y_col]].dropna()
+    
+    results = []
+    groups = data.groupby(req.x_col)[req.y_col]
+    
+    for name, group in groups:
+        # Calculate quartiles using numpy
+        q1 = np.percentile(group, 25)
+        median = np.percentile(group, 50)
+        q3 = np.percentile(group, 75)
+        iqr = q3 - q1
+        
+        # Calculate whiskers (1.5 * IQR rule)
+        lower_whisker = max(group.min(), q1 - 1.5 * iqr)
+        upper_whisker = min(group.max(), q3 + 1.5 * iqr)
+        
+        # Identify outliers
+        outliers = group[(group < lower_whisker) | (group > upper_whisker)].tolist()
+        
+        # Count for sizing/info
+        count = len(group)
+        
+        results.append({
+            "category": str(name),
+            "min": float(lower_whisker),
+            "q1": float(q1),
+            "median": float(median),
+            "q3": float(q3),
+            "max": float(upper_whisker),
+            "outliers": [float(x) for x in outliers],
+            "count": int(count)
+        })
+        
+    return results
+
 @app.get("/api/metrics/monte_carlo")
 def run_monte_carlo(n_sim: int = 1000):
     data_col = df['Addicted_Score'].dropna().values
