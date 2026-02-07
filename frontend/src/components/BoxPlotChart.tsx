@@ -1,7 +1,6 @@
 
 import {
-    ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-    Scatter, Cell
+    ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 
 interface BoxPlotData {
@@ -20,7 +19,7 @@ interface BoxPlotChartProps {
 }
 
 const CustomBoxPlot = (props: any) => {
-    const { x, y, width, height, value } = props;
+    const { x, width, height, value } = props;
     const { min, q1, median, q3, max } = value;
 
     if (!width || !height) return null;
@@ -62,7 +61,7 @@ const CustomBoxPlot = (props: any) => {
 };
 
 // Custom tooltip to show stats
-const CustomTooltip = ({ active, payload, label }: any) => {
+const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
         return (
